@@ -8,7 +8,7 @@ import { type ButtonHTMLAttributes, forwardRef } from 'react';
 // Sizes:    sm | md | lg
 // ============================================================================
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline-danger';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -26,6 +26,10 @@ const variantClasses: Record<Variant, string> = {
     'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
   ghost:
     'bg-transparent text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-400',
+  success:
+    'bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500',
+  'outline-danger':
+    'bg-white text-red-600 border border-red-200 hover:bg-red-50 focus-visible:ring-red-500',
 };
 
 const sizeClasses: Record<Size, string> = {

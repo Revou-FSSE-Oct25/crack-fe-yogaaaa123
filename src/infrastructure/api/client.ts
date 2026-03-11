@@ -68,8 +68,9 @@ export async function apiClient<T>(
       } else {
         throw new Error('Invalid mock credentials. Use admin/password or cashier/password.');
       }
-    } catch (e: any) {
-      throw { errorCode: 'ERR_UNAUTHORIZED', message: e.message || 'Login failed' };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Login failed';
+      throw { errorCode: 'ERR_UNAUTHORIZED', message };
     }
   }
 
@@ -95,6 +96,26 @@ export async function apiClient<T>(
   // Using ISO-8601 strictly so the frontend Date parses it perfectly.
   // ==========================================================================
   if (endpoint.includes('/inventory/movements')) {
+    if (method === 'POST') {
+      await new Promise((r) => setTimeout(r, 600)); // Simulate delay
+      return {
+        success: true,
+        message: 'Mock stock movement recorded',
+        data: {
+          id: `mov-mock-${Date.now()}`,
+          productId: 'mock-id',
+          productName: 'Mock Product',
+          type: 'IN', // mocked loosely
+          quantityChange: 1,
+          notes: 'Mock recorded successful',
+          adminId: 'usr-1',
+          adminName: 'Admin User',
+          createdAt: new Date().toISOString(),
+        } as unknown as T,
+      };
+    }
+
+    // Default GET behavior
     await new Promise((r) => setTimeout(r, 400));
     return {
       success: true,

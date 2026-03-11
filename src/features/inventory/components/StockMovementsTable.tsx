@@ -43,7 +43,11 @@ const columns: Column<StockMovement>[] = [
   { header: 'Keterangan', accessor: 'notes' },
 ];
 
-export function StockMovementsTable() {
+interface StockMovementsTableProps {
+  filterType?: 'IN' | 'OUT';
+}
+
+export function StockMovementsTable({ filterType }: StockMovementsTableProps) {
   const { data, isLoading } = useStockMovements();
 
   if (isLoading) {
@@ -54,13 +58,30 @@ export function StockMovementsTable() {
     );
   }
 
+  // Filter the data based on the prop
+  let tableData = data?.data ?? [];
+  if (filterType) {
+    tableData = tableData.filter((item) => item.type === filterType);
+  }
+
+  const title = filterType === 'IN' 
+    ? 'Riwayat Barang Masuk' 
+    : filterType === 'OUT' 
+      ? 'Riwayat Barang Keluar' 
+      : 'Riwayat Barang Masuk / Keluar';
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h3 className="mb-4 text-lg font-bold text-gray-900">Riwayat Barang Masuk / Keluar</h3>
+      <h3 className="mb-4 text-lg font-bold text-gray-900">{title}</h3>
       <DataTable
         columns={columns}
-        data={data?.data ?? []}
+        data={tableData}
         keyExtractor={(row) => row.id}
+        emptyMessage={
+          filterType === 'IN' 
+          ? 'Belum ada data barang masuk.' 
+          : 'Belum ada data barang keluar.'
+        }
       />
     </div>
   );
