@@ -37,58 +37,6 @@ export async function apiClient<T>(
     headers.set('Idempotency-Key', uuidv4());
   }
 
-  // ==========================================================================
-  // 🚨 TEMPORARY MOCK INTERCEPTOR FOR UI TESTING 🚨
-  // Remove this block once the NestJS backend is ready.
-  // ==========================================================================
-  if (endpoint.includes('/auth/login')) {
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
-    try {
-      const bodyStr = options.body?.toString() || '{}';
-      const credentials = JSON.parse(bodyStr);
-
-      if (credentials.username === 'admin' && credentials.password === 'password') {
-        return {
-          success: true,
-          message: 'Mock login successful',
-          data: {
-            token: 'mock-jwt-token-admin-12345',
-            user: { id: 'usr-1', name: 'Admin User', role: 'ADMIN' },
-          } as unknown as T,
-        };
-      } else if (credentials.username === 'cashier' && credentials.password === 'password') {
-        return {
-          success: true,
-          message: 'Mock login successful',
-          data: {
-            token: 'mock-jwt-token-cashier-67890',
-            user: { id: 'usr-2', name: 'Cashier User', role: 'EMPLOYEE' },
-          } as unknown as T,
-        };
-      } else {
-        throw new Error('Invalid mock credentials. Use admin/password or cashier/password.');
-      }
-    } catch (e: any) {
-      throw { errorCode: 'ERR_UNAUTHORIZED', message: e.message || 'Login failed' };
-    }
-  }
-
-  if ((endpoint.includes('/products') || endpoint.includes('/api/products')) && (!options.method || options.method === 'GET')) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      success: true,
-      message: 'Mock products fetched',
-      data: [
-        { id: '1', name: 'Signature Espresso Blend', price: 45000, stock: 50, categoryId: 'cat-1', categoryName: 'Coffee Beans' },
-        { id: '2', name: 'Oat Milk 1L', price: 35000, stock: 4, categoryId: 'cat-2', categoryName: 'Dairy & Alternatives' },
-        { id: '3', name: 'V60 Paper Filters (100pcs)', price: 75000, stock: 120, categoryId: 'cat-3', categoryName: 'Equipment' },
-        { id: '4', name: 'Caramel Syrup', price: 85000, stock: 15, categoryId: 'cat-4', categoryName: 'Syrups' },
-      ] as unknown as T,
-      meta: { currentPage: 1, totalPages: 1, totalItems: 4, perPage: 10 },
-    };
-  }
-  // ==========================================================================
-
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     method,

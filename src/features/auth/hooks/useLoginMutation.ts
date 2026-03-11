@@ -22,9 +22,8 @@ export function useLoginMutation() {
       }),
 
     onSuccess: (response) => {
-      // 🚨 TEMPORARY MOCK COOKIE SETTER 🚨
-      document.cookie = `auth_token=${response.data.token}; path=/; max-age=86400; samesite=lax`;
-      
+      // The NestJS backend sets the JWT cookie via Set-Cookie header,
+      // so the frontend only needs to redirect based on the user role.
       const { role } = response.data.user;
       router.push(ROLE_HOME[role]);
       router.refresh();

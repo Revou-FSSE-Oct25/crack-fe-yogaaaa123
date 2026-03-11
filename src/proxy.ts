@@ -29,19 +29,13 @@ export async function proxy(request: NextRequest) {
   let user: JWTPayload | null = null;
 
   if (token) {
-    if (token === 'mock-jwt-token-admin-12345') {
-      user = { id: 'usr-1', role: 'ADMIN' };
-    } else if (token === 'mock-jwt-token-cashier-67890') {
-      user = { id: 'usr-2', role: 'EMPLOYEE' };
-    } else {
-      try {
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-        const { payload } = await jwtVerify(token, secret);
-        user = payload as unknown as JWTPayload;
-      } catch {
-        // Expired or tampered token — treat as unauthenticated
-        user = null;
-      }
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+      const { payload } = await jwtVerify(token, secret);
+      user = payload as unknown as JWTPayload;
+    } catch {
+      // Expired or tampered token — treat as unauthenticated
+      user = null;
     }
   }
 
