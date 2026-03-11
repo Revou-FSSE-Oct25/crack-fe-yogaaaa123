@@ -89,6 +89,79 @@ export async function apiClient<T>(
   }
   // ==========================================================================
 
+  // ==========================================================================
+  // 🚨 TEMPORARY MOCKS FOR INVENTORY AND HISTORY TABLES 🚨
+  // Ensure we can see data without the Go/NestJS backend running.
+  // Using ISO-8601 strictly so the frontend Date parses it perfectly.
+  // ==========================================================================
+  if (endpoint.includes('/inventory/movements')) {
+    await new Promise((r) => setTimeout(r, 400));
+    return {
+      success: true,
+      message: 'Mock stock movements fetched',
+      data: [
+        {
+          id: 'mov-1',
+          productId: 'prod-uuid-coffee',
+          productName: 'Signature Espresso Blend',
+          type: 'IN',
+          quantityChange: 50,
+          notes: 'Restock from supplier PT Kopi Indo',
+          adminId: 'usr-1',
+          adminName: 'Admin User',
+          createdAt: '2026-03-12T05:30:00Z', 
+        },
+        {
+          id: 'mov-2',
+          productId: 'prod-uuid-milk',
+          productName: 'Oat Milk 1L',
+          type: 'OUT',
+          quantityChange: -10,
+          notes: 'Expired stock removed',
+          adminId: 'usr-1',
+          adminName: 'Admin User',
+          createdAt: '2026-03-11T14:15:00Z', 
+        },
+      ] as unknown as T,
+      meta: { currentPage: 1, totalPages: 1, totalItems: 2, perPage: 10 }
+    };
+  }
+
+  if (endpoint.includes('/transactions/history')) {
+    await new Promise((r) => setTimeout(r, 600));
+    return {
+      success: true,
+      message: 'Mock transactions history fetched',
+      data: [
+        {
+          id: 'trx-xyz-123',
+          cashierId: 'usr-2',
+          cashierName: 'Cashier Budi',
+          totalAmount: 125000,
+          paymentMethod: 'QRIS',
+          createdAt: '2026-03-12T08:45:00Z',
+          items: [
+            { productId: 'prod-uuid-coffee', productName: 'Signature Espresso Blend', quantity: 2, priceAtTransaction: 45000 },
+            { productId: 'prod-uuid-milk', productName: 'Oat Milk 1L', quantity: 1, priceAtTransaction: 35000 },
+          ],
+        },
+        {
+          id: 'trx-abc-456',
+          cashierId: 'usr-2',
+          cashierName: 'Cashier Budi',
+          totalAmount: 75000,
+          paymentMethod: 'CASH',
+          createdAt: '2026-03-11T16:20:00Z',
+          items: [
+            { productId: 'prod-uuid-filter', productName: 'V60 Paper Filters (100pcs)', quantity: 1, priceAtTransaction: 75000 },
+          ],
+        },
+      ] as unknown as T,
+      meta: { currentPage: 1, totalPages: 1, totalItems: 2, perPage: 10 }
+    };
+  }
+  // ==========================================================================
+
   const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     method,

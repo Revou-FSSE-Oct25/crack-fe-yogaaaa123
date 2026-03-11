@@ -17,6 +17,8 @@ interface NavItem {
 const adminNavItems: NavItem[] = [
   { label: 'Overview', href: '/dashboard/admin', icon: '📊' },
   { label: 'Products', href: '/dashboard/admin/products', icon: '📦' },
+  { label: 'Inventory', href: '/dashboard/admin/inventory', icon: '🚚' },
+  { label: 'History', href: '/dashboard/admin/history', icon: '🧾' },
   { label: 'Reports', href: '/dashboard/admin/reports', icon: '📈' },
 ];
 
