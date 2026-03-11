@@ -1,490 +1,240 @@
-#  Inventory Management SaaS — Frontend Architecture
+# 💎 CrackPOS — Inventory & Point of Sale System
 
-Frontend architecture documentation for an **Inventory & Sales Management System** built using **Next.js + TypeScript**.
-This project follows a **feature-driven architecture** designed to simulate a real SaaS product used by UMKM and retail stores.
+A production-ready frontend for an Inventory Management and Point of Sale (POS) system, built with **Next.js 16 App Router** and designed for seamless integration with a NestJS backend.
 
----
+## Tech Stack
 
-#  Project Overview
-
-This application allows store owners to:
-
-* View marketing website (landing page & pricing)
-* Register and login
-* Subscribe to access the system
-* Create their own store workspace
-* Manage inventory
-* Track stock in/out
-* Monitor daily sales
-* Generate reports
-
-Each user owns a **private store workspace** — data is isolated per store.
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript 5 (strict mode) |
+| Styling | Tailwind CSS 4 |
+| State Management | Zustand (client cart state) |
+| Server Data Fetching | TanStack React Query |
+| Forms & Validation | React Hook Form + Zod 4 |
+| Auth Gateway | `proxy.ts` (Next.js 16 middleware replacement) |
+| JWT Verification | jose (Edge-compatible) |
 
 ---
 
-#  Architecture Philosophy
+## Getting Started
 
-The project uses:
+### Prerequisites
 
-* **Feature-Based Architecture**
-* **Thin Page Pattern**
-* **Separation of Concerns**
-* **Scalable SaaS Structure**
+- [Bun](https://bun.sh) v1.3+
+- Node.js 20+ (for Next.js compatibility)
 
-Core principle:
+### Installation
 
-```
-app/        → routing & page entry
-features/   → business logic + feature UI
-components/ → reusable UI
-lib/        → system utilities
+```bash
+# Clone the repository
+git clone <repo-url>
+cd crack-fe-yogaaaa123
+
+# Install dependencies
+bun install
 ```
 
+### Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+# Backend API base URL
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
+
+# JWT secret (must match the NestJS backend)
+JWT_SECRET=your-jwt-secret-key-here
+```
+
+### Development
+
+```bash
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+### Production Build
+
+```bash
+bun run build
+bun run start
+```
+
 ---
 
-#  Project Structure
+## Project Architecture
+
+The project follows a **feature-based architecture** with strict separation between UI components, domain logic, and infrastructure.
 
 ```
 src/
+├── app/                        # App Layer — Next.js App Router
+│   ├── (auth)/login/           # → /login (public)
+│   ├── dashboard/
+│   │   ├── layout.tsx          # Dashboard shell (Server Component)
+│   │   ├── admin/              # Admin routes
+│   │   │   ├── page.tsx        # → /dashboard/admin
+│   │   │   ├── products/       # → /dashboard/admin/products
+│   │   │   └── reports/        # → /dashboard/admin/reports
+│   │   └── cashier/            # Employee routes
+│   │       ├── page.tsx        # → /dashboard/cashier
+│   │       └── transaction/    # → /dashboard/cashier/transaction
+│   └── layout.tsx              # Root layout (AppProviders)
 │
-├── app/
-├── features/
-├── components/
-├── providers/
-├── lib/
-├── hooks/
-├── types/
-├── styles/
-└── middleware.ts
+├── components/                 # Component Layer — Shared UI
+│   ├── ui/                     # Button, Input, Modal, DataTable
+│   ├── layouts/                # Sidebar, DashboardHeader
+│   └── providers/              # AppProviders (QueryClientProvider)
+│
+├── features/                   # Feature Layer — Domain Logic
+│   ├── auth/                   # Login form, mutation, schema
+│   ├── products/               # CRUD, search, product cards
+│   └── transactions/           # Cart (Zustand), checkout, history
+│
+├── infrastructure/             # Infrastructure Layer — Global Utilities
+│   ├── api/                    # API client, response/error types
+│   ├── events/                 # SSE inventory sync
+│   └── utils/                  # Constants, formatters
+│
+└── proxy.ts                    # Auth gateway (JWT + RBAC)
 ```
 
 ---
 
-#  app/ — Routing Layer
+## Routing & Authentication
 
-Defines all website routes using **Next.js App Router**.
+### Route Map
+
+| Route | Access | Description |
+|---|---|---|
+| `/login` | Public | Login page |
+| `/dashboard/admin` | Admin only | Overview with stats |
+| `/dashboard/admin/products` | Admin only | Product management (CRUD) |
+| `/dashboard/admin/reports` | Admin only | Sales reports |
+| `/dashboard/cashier` | Employee only | POS terminal (product grid + cart) |
+| `/dashboard/cashier/transaction` | Employee only | Transaction history |
+
+### Authentication Flow
+
+1. User submits credentials on `/login`
+2. NestJS backend validates and returns JWT via `Set-Cookie` header
+3. Client redirects to the appropriate dashboard based on user role
+4. `proxy.ts` intercepts all subsequent requests:
+   - Verifies JWT from `auth_token` cookie
+   - Redirects unauthenticated users to `/login`
+   - Enforces role-based access (Admin ↔ Employee)
+   - Forwards `x-user-role` and `x-user-id` headers to Server Components
+
+### Role-Based Access Control
 
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── (marketing)/
-├── (auth)/
-├── onboarding/
-└── (dashboard)/
-```
-
-## Purpose
-
-* Defines URL routes
-* Composes pages
-* Loads feature components
-
- No business logic should live here.
-
----
-
-## Key Files
-
-### `layout.tsx`
-
-Root layout:
-
-* Inject global providers
-* Apply global styles
-
-### `page.tsx`
-
-Landing route `/`.
-
-```tsx
-return <LandingPage />
+proxy.ts (Edge Layer)
+  ├── Admin trying /dashboard/cashier/* → redirect to /dashboard/admin
+  ├── Employee trying /dashboard/admin/* → redirect to /dashboard/cashier
+  └── Unauthenticated → redirect to /login
 ```
 
 ---
 
-## Route Groups
+## Backend Integration Patterns
 
-### `(marketing)`
+### 1. Standardized API Contracts
 
-Public pages:
+Every API call uses a unified response shape:
 
-* landing
-* pricing
-* features
-* about
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  meta?: { currentPage, totalPages, totalItems, perPage };
+}
 
-Accessible without login.
+interface ApiError {
+  errorCode: string;   // e.g. 'ERR_INSUFFICIENT_STOCK'
+  message: string;
+  validationErrors?: Record<string, string[]>;
+}
+```
+
+> The NestJS backend only needs a single generic response interceptor.
+
+### 2. Idempotency Keys
+
+All mutation requests (`POST`, `PUT`, `PATCH`) automatically attach a UUID `Idempotency-Key` header to prevent duplicate transactions from network retries or double-clicks.
+
+### 3. URL-Driven State
+
+Table filters, search, sorting, and pagination are stored in URL search params (`?page=1&search=coffee&sort=price_desc`), NOT in client state. Benefits:
+- Page refresh preserves filters
+- Deep-linking works out of the box
+- NestJS backend can bind query params directly with `@Query()` decorators
+
+### 4. Symmetrical Zod Validation
+
+Frontend Zod schemas document NestJS class-validator decorators in comments:
+
+```typescript
+// Frontend (Zod)
+price: z.number().int().positive()
+
+// NestJS equivalent (class-validator):
+// @IsInt() @Min(1) price: number;
+```
+
+### 5. Real-Time Sync (SSE Ready)
+
+The `useInventorySync` hook listens for `STOCK_UPDATED` events via Server-Sent Events and automatically invalidates TanStack Query caches, preventing overselling across terminals.
 
 ---
 
-### `(auth)`
+## Cart System
 
-Authentication pages:
+The cart is managed by a **Zustand store** (`useCartStore`) with the following capabilities:
 
-* login
-* register
+| Action | Description |
+|---|---|
+| `addItem(product)` | Adds product to cart (or increments quantity, capped at stock) |
+| `removeItem(productId)` | Removes item from cart |
+| `updateQuantity(productId, qty)` | Sets quantity (auto-removes if 0, capped at stock) |
+| `clearCart()` | Empties the cart |
+| `getTotalPrice()` | Calculates sum of `price × quantity` |
+| `getItemCount()` | Returns total number of items |
 
----
-
-### `onboarding`
-
-Executed after first login.
-
-User creates:
-
-* store name
-* business type
-
-Creates workspace identity.
+Checkout sends `POST /transactions` with an `Idempotency-Key` header, then clears the cart and refreshes product stock.
 
 ---
 
-### `(dashboard)`
+## Key Dependencies
 
-Protected application area:
-
-* Dashboard overview
-* Products
-* Transactions
-* Reports
-* Settings
-
----
-
-#  features/ — Business Domains 
-
-Each folder represents a **product feature**.
-
-```
-features/
-├── marketing/
-├── auth/
-├── workspace/
-├── inventory/
-├── transactions/
-└── reports/
-```
+| Package | Version | Purpose |
+|---|---|---|
+| `next` | 16.1.6 | Framework |
+| `react` | 19.2.3 | UI library |
+| `zustand` | 5.x | Client state (cart) |
+| `@tanstack/react-query` | 5.x | Server state / data fetching |
+| `react-hook-form` | 7.x | Form management |
+| `@hookform/resolvers` | 5.x | Zod ↔ RHF bridge |
+| `zod` | 4.x | Schema validation |
+| `jose` | 6.x | Edge-compatible JWT verification |
+| `uuid` | 13.x | Idempotency key generation |
+| `tailwindcss` | 4.x | Styling |
 
 ---
 
-##  marketing/
+## Scripts
 
-Landing website components.
-
-```
-landing/
-├── LandingPage.tsx
-├── components/
-└── data/
-```
-
-### Files
-
-* `LandingPage.tsx` → Composes landing sections
-* `HeroSection.tsx` → Product introduction
-* `FeatureSection.tsx` → Benefits explanation
-* `PricingPreview.tsx` → Pricing overview
-* `CTASection.tsx` → Call-to-action
-* `landing.data.ts` → Static marketing data
-
----
-
-##  auth/
-
-Authentication system.
-
-```
-auth/
-├── components/
-├── hooks/
-├── services/
-├── auth.store.ts
-└── types.ts
-```
-
-### Responsibilities
-
-* Login & register
-* Session handling
-* Token storage
-
-Key files:
-
-| File             | Purpose           |
-| ---------------- | ----------------- |
-| LoginForm.tsx    | Login UI          |
-| RegisterForm.tsx | Signup UI         |
-| useAuth.ts       | Auth logic        |
-| auth.api.ts      | API calls         |
-| auth.store.ts    | Global auth state |
-
----
-
-##  workspace/
-
-Represents a user's store.
-
-```
-workspace/
-├── WorkspaceForm.tsx
-├── useWorkspace.ts
-└── workspace.api.ts
-```
-
-Flow:
-
-```
-Login → Create Store → Dashboard Access
+```bash
+bun run dev      # Start development server (Turbopack)
+bun run build    # Production build
+bun run start    # Start production server
+bun run lint     # Run ESLint
 ```
 
 ---
 
-##  inventory/
+## License
 
-Core inventory management.
-
-```
-inventory/
-├── components/
-├── hooks/
-├── services/
-└── types.ts
-```
-
-### Features
-
-* Create products
-* Edit products
-* Track stock
-* Category grouping
-
-Key components:
-
-* ProductTable.tsx
-* ProductForm.tsx
-* StockBadge.tsx
-
-Hooks:
-
-* useProducts()
-* useCreateProduct()
-* useUpdateProduct()
-
----
-
-##  transactions/
-
-Handles sales and restocking.
-
-```
-transactions/
-├── StockOutForm.tsx
-├── StockInForm.tsx
-├── TransactionTable.tsx
-├── useTransactions.ts
-└── transaction.api.ts
-```
-
-Logic:
-
-```
-Sell product → stock decreases automatically
-```
-
----
-
-##  reports/
-
-Sales analytics & reporting.
-
-```
-reports/
-├── SalesSummary.tsx
-├── RevenueCard.tsx
-├── SalesChart.tsx
-└── useReports.ts
-```
-
-Displays:
-
-* daily revenue
-* product performance
-* sales charts
-
----
-
-#  components/ui/ — Reusable UI
-
-Generic components used across features.
-
-```
-components/ui/
-├── Button.tsx
-├── Input.tsx
-├── Modal.tsx
-├── Table.tsx
-├── Card.tsx
-├── Badge.tsx
-├── Spinner.tsx
-└── ConfirmDialog.tsx
-```
-
-Rules:
-
-* No business logic
-* Pure visual components
-
----
-
-#  providers/
-
-Global React providers.
-
-```
-providers/
-├── QueryProvider.tsx
-├── AuthProvider.tsx
-└── ThemeProvider.tsx
-```
-
-Responsibilities:
-
-* React Query setup
-* Authentication context
-* Theme management
-
----
-
-#  lib/
-
-Core utilities and configurations.
-
-```
-lib/
-├── api.ts
-├── queryClient.ts
-├── constants.ts
-├── utils.ts
-└── env.ts
-```
-
-Examples:
-
-* Axios instance
-* API interceptors
-* helpers
-
----
-
-#  hooks/
-
-Shared reusable hooks.
-
-```
-hooks/
-├── useDebounce.ts
-├── usePagination.ts
-└── useLocalStorage.ts
-```
-
-Used across multiple features.
-
----
-
-#  types/
-
-Global TypeScript types.
-
-```
-types/
-├── user.ts
-├── api.ts
-└── common.ts
-```
-
----
-
-#  styles/
-
-Global styling.
-
-```
-styles/
-├── globals.css
-└── variables.css
-```
-
----
-
-#  proxy.ts
-
-Route protection logic.
-
-Example rules:
-
-```
-if not logged in → /login
-if no subscription → /pricing
-if no workspace → /onboarding
-```
-
----
-
-# 🔄 Data Flow Example (Selling Product)
-
-```
-User clicks Sell
-      ↓
-StockOutForm
-      ↓
-useCreateTransaction()
-      ↓
-transaction.api.ts
-      ↓
-Backend updates stock
-      ↓
-React Query invalidates cache
-      ↓
-ProductTable re-renders automatically
-```
-
-No page reload required.
-
----
-
-# 🧠 Engineering Principles Applied
-
-* Feature-driven design
-* Domain separation
-* Scalable component hierarchy
-* Server-state management via React Query
-* SaaS-ready architecture
-
----
-
-# 🚀 Result
-
-This architecture enables:
-
-* Multi-store isolation
-* Scalable feature growth
-* Maintainable codebase
-* Production-ready frontend structure
-
----
-
-**Status:** Startup-level MVP Architecture
-**Purpose:** Portfolio + Real SaaS Simulation
-
----
-
-
-
-
-
-
-
-
-
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/-nyOcXJT)
+This project is part of the Crack Final Project.
