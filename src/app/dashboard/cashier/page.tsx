@@ -8,10 +8,10 @@ import { ProductCard } from '@/features/products/components/ProductCard';
 import { ProductSearchBar } from '@/features/products/components/ProductSearchBar';
 import { CartSidebar } from '@/features/transactions/components/CartSidebar';
 
-// ============================================================================
+// ---
 // /dashboard/cashier — Point of Sale terminal
 // Left: Product grid with search | Right: Cart sidebar with checkout
-// ============================================================================
+// ---
 
 function CashierContent() {
   const { data, isLoading } = useProducts();

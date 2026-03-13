@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Admin Overview — CrackPOS' };
 
-// ============================================================================
+// ---
 // /dashboard/admin — Admin overview page
-// ============================================================================
+// ---
 
 export default function AdminDashboardPage() {
   return (

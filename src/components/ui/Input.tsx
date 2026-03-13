@@ -3,9 +3,9 @@
 import { forwardRef, type InputHTMLAttributes } from 'react';
 import type { FieldError } from 'react-hook-form';
 
-// ============================================================================
+// ---
 // Input — Shared form input with label and error display
-// ============================================================================
+// ---
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

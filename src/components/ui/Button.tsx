@@ -2,11 +2,11 @@
 
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
 
-// ============================================================================
+// ---
 // Button — Shared primitive component
 // Variants: primary | secondary | danger | ghost
 // Sizes:    sm | md | lg
-// ============================================================================
+// ---
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline-danger';
 type Size = 'sm' | 'md' | 'lg';

@@ -1,12 +1,4 @@
-// ============================================================================
-// Standardized API Response & Error Contracts
-// These generic types mirror the NestJS backend's response wrapper.
-// ============================================================================
-
-/**
- * Universal API response wrapper.
- * Every endpoint from the NestJS backend returns this shape.
- */
+// Universal API response wrapper & pagination types mirroring NestJS backend
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -14,9 +6,7 @@ export interface ApiResponse<T> {
   meta?: PaginationMeta;
 }
 
-/**
- * Pagination metadata attached to list endpoints.
- */
+// Pagination metadata for list endpoints
 export interface PaginationMeta {
   currentPage: number;
   totalPages: number;
@@ -24,11 +14,7 @@ export interface PaginationMeta {
   perPage: number;
 }
 
-/**
- * Standardized error body returned by the NestJS backend.
- * The `errorCode` field allows the frontend to react to specific domain errors
- * (e.g. 'ERR_INSUFFICIENT_STOCK') without brittle string matching on `message`.
- */
+// Standardized error body with errorCode to prevent brittle string matching
 export interface ApiError {
   errorCode: string;
   message: string;

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Transaction History — CrackPOS' };
 
-// ============================================================================
+// ---
 // /dashboard/cashier/transaction — Transaction history for the current cashier
-// ============================================================================
+// ---
 
 export default function CashierTransactionPage() {
   return (

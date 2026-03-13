@@ -6,12 +6,12 @@ import { QUERY_KEYS } from '@/infrastructure/utils/constants';
 import { useCartStore } from '../store/useCartStore';
 import type { Transaction, CreateTransactionPayload } from '../types';
 
-// ============================================================================
+// ---
 // useCreateTransaction — Checkout mutation
 // 1. Builds the payload from the Zustand cart
 // 2. Posts with an Idempotency-Key to prevent double-charging
 // 3. Clears the cart and refreshes product stock on success
-// ============================================================================
+// ---
 
 export function useCreateTransaction() {
   const queryClient = useQueryClient();

@@ -6,10 +6,10 @@ import { QUERY_KEYS } from '@/infrastructure/utils/constants';
 import type { Product } from '../types';
 import type { CreateProductInput } from '../schemas/productSchema';
 
-// ============================================================================
+// ---
 // useCreateProduct — Mutation with automatic cache invalidation
 // Uses idempotency key to prevent duplicate product creation.
-// ============================================================================
+// ---
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();

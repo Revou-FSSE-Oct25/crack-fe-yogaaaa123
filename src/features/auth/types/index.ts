@@ -1,8 +1,8 @@
 import type { UserRole } from '@/infrastructure/utils/constants';
 
-// ============================================================================
+// ---
 // Auth Domain Types
-// ============================================================================
+// ---
 
 /** Credentials submitted from the LoginForm */
 export interface LoginCredentials {

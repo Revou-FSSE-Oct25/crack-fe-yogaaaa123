@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
-// ============================================================================
+// ---
 // Transaction Schema — Symmetrical blueprint for NestJS backend validation
 // NestJS equivalent (class-validator):
 //   @IsArray() @ValidateNested({ each: true }) items: TransactionItemDto[];
 //   @IsUUID()                                  productId: string;
 //   @IsInt() @Min(1)                           quantity: number;
-// ============================================================================
+// ---
 
 const transactionItemSchema = z.object({
   productId: z.string().uuid('Invalid product ID'),

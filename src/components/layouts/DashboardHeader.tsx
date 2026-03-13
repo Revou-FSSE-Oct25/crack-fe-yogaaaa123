@@ -1,8 +1,8 @@
 import type { UserRole } from '@/infrastructure/utils/constants';
 
-// ============================================================================
+// ---
 // DashboardHeader — Displays page title and user info
-// ============================================================================
+// ---
 
 interface DashboardHeaderProps {
   role: UserRole;

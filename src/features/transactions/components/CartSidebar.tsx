@@ -6,10 +6,10 @@ import { formatCurrency } from '@/infrastructure/utils/formatCurrency';
 import { Button } from '@/components/ui/Button';
 import type { ApiError } from '@/infrastructure/api/types';
 
-// ============================================================================
+// ---
 // CartSidebar — Displays cart contents and checkout action
 // Lives in the cashier POS layout as a persistent right sidebar.
-// ============================================================================
+// ---
 
 export function CartSidebar() {
   const items = useCartStore((s) => s.items);

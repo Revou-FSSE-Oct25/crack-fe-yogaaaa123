@@ -6,10 +6,10 @@ import { apiClient } from '@/infrastructure/api/client';
 import { ROLE_HOME } from '@/infrastructure/utils/constants';
 import type { LoginCredentials, LoginResponse } from '../types';
 
-// ============================================================================
+// ---
 // useLoginMutation
 // Posts credentials → receives JWT + user profile → redirects by role
-// ============================================================================
+// ---
 
 export function useLoginMutation() {
   const router = useRouter();

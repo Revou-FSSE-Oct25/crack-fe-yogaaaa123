@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-// ============================================================================
+// ---
 // Product Schemas — Symmetrical blueprint for NestJS backend validation
 // NestJS equivalent (class-validator):
 //   @IsString() @MinLength(3) @MaxLength(100) name: string;
 //   @IsInt() @Min(1)                          price: number;
 //   @IsInt() @Min(0)                          stock: number;
 //   @IsUUID()                                 categoryId: string;
-// ============================================================================
+// ---
 
 export const createProductSchema = z.object({
   name: z

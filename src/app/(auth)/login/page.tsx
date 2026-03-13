@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   title: 'Login — CrackPOS',
 };
 
-// ============================================================================
+// ---
 // /login — Public login page
-// ============================================================================
+// ---
 
 export default function LoginPage() {
   return (

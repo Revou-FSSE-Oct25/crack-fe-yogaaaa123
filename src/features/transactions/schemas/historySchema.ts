@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-// ============================================================================
+// ---
 // /dashboard/admin/history — Data Contract for NestJS Backend
-// ============================================================================
+// ---
 
 export const transactionItemSchema = z.object({
   productId: z.string(),

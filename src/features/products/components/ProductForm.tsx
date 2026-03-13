@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { ApiError } from '@/infrastructure/api/types';
 
-// ============================================================================
+// ---
 // ProductForm — Admin-only form for creating new products
-// ============================================================================
+// ---
 
 interface ProductFormProps {
   onSuccess?: () => void;

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 
-// ============================================================================
+// ---
 // DataTable — Lightweight table wrapper for admin data views
 // Accepts generic column definitions and rows.
-// ============================================================================
+// ---
 
 export interface Column<T> {
   header: string;

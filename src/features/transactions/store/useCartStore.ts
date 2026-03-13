@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import type { Product } from '@/features/products/types';
 import type { CartItem } from '../types';
 
-// ============================================================================
+// ---
 // Cart Store (Zustand)
 // Manages ephemeral cart state on the client. This store is NEVER persisted
 // to the server — it only lives until the cashier completes checkout.
-// ============================================================================
+// ---
 
 interface CartState {
   items: CartItem[];

@@ -1,6 +1,6 @@
-// ============================================================================
+// ---
 // Application-wide constants
-// ============================================================================
+// ---
 
 /** Cookie key used to store the JWT auth token */
 export const AUTH_TOKEN_KEY = 'auth_token';

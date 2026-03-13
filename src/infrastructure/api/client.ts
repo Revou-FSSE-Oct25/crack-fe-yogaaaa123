@@ -1,23 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ApiResponse, ApiError } from './types';
 
-// ============================================================================
-// Production API Client
-// - Standardized JSON fetch wrapper
-// - Automatic Idempotency-Key injection for unsafe methods
-// - Uniform error mapping to ApiError
-// ============================================================================
-
+// Core JSON fetch wrapper with automatic Idempotency-Key for unsafe methods
 const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
-/**
- * Core fetch wrapper used by all TanStack Query hooks and Server Components.
- *
- * @param endpoint  - API path relative to NEXT_PUBLIC_API_URL (e.g. '/products')
- * @param options   - Standard RequestInit overrides
- * @param idempotent - When true, attaches a UUID Idempotency-Key header for
- *                     mutation safety (prevents duplicate transactions)
- */
 export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -37,10 +23,7 @@ export async function apiClient<T>(
     headers.set('Idempotency-Key', uuidv4());
   }
 
-  // ==========================================================================
-  // 🚨 TEMPORARY MOCK INTERCEPTOR FOR UI TESTING 🚨
-  // Remove this block once the NestJS backend is ready.
-  // ==========================================================================
+  // TEMPORARY MOCK INTERCEPTOR FOR UI TESTING - Remove when backend is ready
   if (endpoint.includes('/auth/login')) {
     await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
     try {
@@ -90,11 +73,7 @@ export async function apiClient<T>(
   }
   // ==========================================================================
 
-  // ==========================================================================
-  // 🚨 TEMPORARY MOCKS FOR INVENTORY AND HISTORY TABLES 🚨
-  // Ensure we can see data without the Go/NestJS backend running.
-  // Using ISO-8601 strictly so the frontend Date parses it perfectly.
-  // ==========================================================================
+  // TEMPORARY MOCKS FOR INVENTORY AND HISTORY TABLES - Using ISO-8601 strictly for Date parsing
   if (endpoint.includes('/inventory/movements')) {
     if (method === 'POST') {
       await new Promise((r) => setTimeout(r, 600)); // Simulate delay

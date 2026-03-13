@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-// ============================================================================
+// ---
 // /dashboard/admin/inventory — Data Contract for NestJS Backend
-// ============================================================================
+// ---
 
 export const stockMovementType = z.enum(['IN', 'OUT', 'ADJUSTMENT']);
 

@@ -4,7 +4,7 @@ import { jwtVerify } from 'jose';
 import { AUTH_TOKEN_KEY, ROLE_HOME } from '@/infrastructure/utils/constants';
 import type { UserRole } from '@/infrastructure/utils/constants';
 
-// ============================================================================
+// ---
 // proxy.ts — Next.js 16 Request Interception Gateway
 //
 // Runs at the Edge before any route rendering.
@@ -14,7 +14,7 @@ import type { UserRole } from '@/infrastructure/utils/constants';
 //   3. Redirect authenticated users away from /login
 //   4. Enforce Role-Based Access Control (RBAC)
 //   5. Forward user identity headers to Server Components
-// ============================================================================
+// ---
 
 interface JWTPayload {
   id: string;

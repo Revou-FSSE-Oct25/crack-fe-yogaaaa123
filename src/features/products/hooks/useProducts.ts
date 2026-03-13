@@ -6,11 +6,11 @@ import { apiClient } from '@/infrastructure/api/client';
 import { QUERY_KEYS } from '@/infrastructure/utils/constants';
 import type { Product, ProductQueryParams } from '../types';
 
-// ============================================================================
+// ---
 // useProducts — URL-Driven product list query
 // Reads page/search/sort from URL params, so the NestJS backend receives identical
 // query strings that it can bind directly into SQL queries.
-// ============================================================================
+// ---
 
 export function useProducts() {
   const searchParams = useSearchParams();

@@ -4,10 +4,10 @@ import { Sidebar } from '@/components/layouts/Sidebar';
 import { DashboardHeader } from '@/components/layouts/DashboardHeader';
 import type { UserRole } from '@/infrastructure/utils/constants';
 
-// ============================================================================
+// ---
 // Dashboard Layout — Server Component shell
 // Reads user identity from headers set by proxy.ts
-// ============================================================================
+// ---
 
 export default async function DashboardLayout({
   children,

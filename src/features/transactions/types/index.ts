@@ -1,8 +1,8 @@
 import type { Product } from '@/features/products/types';
 
-// ============================================================================
+// ---
 // Transaction Domain Types
-// ============================================================================
+// ---
 
 /** A single item within a transaction */
 export interface TransactionItem {

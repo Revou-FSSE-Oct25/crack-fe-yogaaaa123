@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Reports — CrackPOS' };
 
-// ============================================================================
+// ---
 // /dashboard/admin/reports — Transaction reports & analytics (Admin only)
-// ============================================================================
+// ---
 
 export default function AdminReportsPage() {
   return (

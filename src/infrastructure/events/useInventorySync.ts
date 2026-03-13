@@ -3,10 +3,10 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-// ============================================================================
+// ---
 // Real-Time Inventory Synchronization via SSE
 // Listens to backend-pushed events and automatically invalidates stale caches.
-// ============================================================================
+// ---
 
 /**
  * Hook that opens a Server-Sent Events connection to the NestJS backend.

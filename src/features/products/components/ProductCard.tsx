@@ -4,10 +4,10 @@ import type { Product } from '../types';
 import { formatCurrency } from '@/infrastructure/utils/formatCurrency';
 import { Button } from '@/components/ui/Button';
 
-// ============================================================================
+// ---
 // ProductCard — Displays a single product tile
 // Cashier variant includes "Add to Cart" action.
-// ============================================================================
+// ---
 
 interface ProductCardProps {
   product: Product;

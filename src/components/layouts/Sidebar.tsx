@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { UserRole } from '@/infrastructure/utils/constants';
 
-// ============================================================================
+// ---
 // Sidebar — Dashboard navigation, dynamically rendered per role
-// ============================================================================
+// ---
 
 interface NavItem {
   label: string;

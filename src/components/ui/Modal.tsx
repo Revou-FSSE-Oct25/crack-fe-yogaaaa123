@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 
-// ============================================================================
+// ---
 // Modal — Accessible overlay with focus trap and Escape key support
-// ============================================================================
+// ---
 
 interface ModalProps {
   isOpen: boolean;

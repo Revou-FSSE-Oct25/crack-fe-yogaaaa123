@@ -2,11 +2,11 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// ============================================================================
+// ---
 // ProductSearchBar — URL-driven search input
 // Updates the browser URL, which passively drives TanStack Query via
 // useProducts() hook. The NestJS backend receives the same query string.
-// ============================================================================
+// ---
 
 export function ProductSearchBar() {
   const router = useRouter();

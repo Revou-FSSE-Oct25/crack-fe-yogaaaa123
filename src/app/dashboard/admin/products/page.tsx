@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/infrastructure/utils/formatCurrency';
 import type { Product } from '@/features/products/types';
 
-// ============================================================================
+// ---
 // /dashboard/admin/products — Product management page (Admin only)
-// ============================================================================
+// ---
 
 const columns: Column<Product>[] = [
   { header: 'Name', accessor: 'name' },

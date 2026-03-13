@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { ApiError } from '@/infrastructure/api/types';
 
-// ============================================================================
+// ---
 // LoginForm — React Hook Form + Zod validation + TanStack mutation
-// ============================================================================
+// ---
 
 export function LoginForm() {
   const {
