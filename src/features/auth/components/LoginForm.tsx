@@ -7,10 +7,7 @@ import { useLoginMutation } from '../hooks/useLoginMutation';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { ApiError } from '@/infrastructure/api/types';
-
-// ---
-// LoginForm — React Hook Form + Zod validation + TanStack mutation
-// ---
+import Link from 'next/link';
 
 export function LoginForm() {
   const {
@@ -32,7 +29,7 @@ export function LoginForm() {
       <Input
         id="username"
         label="Username"
-        placeholder="Enter your username"
+        placeholder="Enter your username (e.g. admin)"
         error={errors.username}
         {...register('username')}
       />
@@ -55,6 +52,13 @@ export function LoginForm() {
       <Button type="submit" isLoading={login.isPending} size="lg">
         Sign In
       </Button>
+
+      <p className="mt-4 text-center text-sm text-gray-600">
+        Don't have an account?{' '}
+        <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          Register here
+        </Link>
+      </p>
     </form>
   );
 }

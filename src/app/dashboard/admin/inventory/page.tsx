@@ -1,87 +1,91 @@
 'use client';
 
-import { useState } from 'react';
-import { StockMovementsTable } from '@/features/inventory/components/StockMovementsTable';
-import { StockMovementForm } from '@/features/inventory/components/StockMovementForm';
-import { Modal } from '@/components/ui/Modal';
+import { Suspense, useState } from 'react';
+import { useProducts } from '@/features/products/hooks/useProducts';
+import { useAdjustStock, type AdjustStockInput } from '@/features/inventory/hooks/useAdjustStock';
+import { useLowStockProducts } from '@/features/inventory/hooks/useLowStockProducts';
+import { DataTable, type Column } from '@/components/ui/DataTable';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import type { LowStockProduct } from '@/features/inventory/hooks/useLowStockProducts';
 
-export default function InventoryPage() {
-  const [modalType, setModalType] = useState<'IN' | 'OUT' | null>(null);
-  const [activeTab, setActiveTab] = useState<'IN' | 'OUT'>('IN');
+function InventoryContent() {
+  const { data: productsData } = useProducts();
+  const adjustStock = useAdjustStock();
+  const { data: lowStock, isLoading: lowLoading } = useLowStockProducts();
+  const productsList = productsData?.data ?? [];
 
-  const handleClose = () => setModalType(null);
+  const [productId, setProductId] = useState('');
+  const [quantityChange, setQuantityChange] = useState(0);
+  const [type, setType] = useState<AdjustStockInput['type']>('ADJUSTMENT');
+  const [notes, setNotes] = useState('');
+
+  const handleSubmit = () => {
+    if (!productId || quantityChange === 0) return;
+    adjustStock.mutate({ productId, quantityChange, type, notes: notes || undefined }, {
+      onSuccess: () => { setProductId(''); setQuantityChange(0); setNotes(''); },
+    });
+  };
+
+  const lowColumns: Column<LowStockProduct>[] = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'SKU', accessor: 'sku' },
+    { header: 'Stock', accessor: (r) => <span className="font-semibold text-red-600">{r.stockQuantity}</span> },
+    { header: 'Reorder Level', accessor: 'reorderLevel' },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Inventory</h2>
-        <div className="flex gap-3">
-          <Button 
-            variant="outline-danger"
-            onClick={() => setModalType('OUT')}
-          >
-            - Catat Keluar
-          </Button>
-          <Button 
-            variant="success"
-            onClick={() => setModalType('IN')}
-          >
-            + Catat Masuk
+      <h2 className="text-2xl font-bold text-gray-900">Inventory</h2>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 text-lg font-bold text-gray-900">Adjust Stock</h3>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Product</label>
+            <select value={productId} onChange={(e) => setProductId(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+              <option value="">Select product</option>
+              {productsList.map((p) => <option key={p.id} value={p.id}>{p.name} (Stock: {p.stockQuantity})</option>)}
+            </select>
+          </div>
+          <Input id="inv-qty" label="Quantity Change (+/-)" type="number" value={quantityChange} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuantityChange(Number(e.target.value))} placeholder="e.g. 10 or -5" />
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Type</label>
+            <select value={type} onChange={(e) => setType(e.target.value as AdjustStockInput['type'])} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+              <option value="ADJUSTMENT">Adjustment</option>
+              <option value="DAMAGED">Damaged</option>
+              <option value="LOST">Lost</option>
+              <option value="FOUND">Found</option>
+              <option value="MANUAL">Manual</option>
+            </select>
+          </div>
+          <Input id="inv-notes" label="Notes (optional)" value={notes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNotes(e.target.value)} placeholder="Reason for adjustment" />
+          {adjustStock.isError && <p className="rounded-md bg-red-50 p-2 text-sm text-red-600">{(adjustStock.error as unknown as Error)?.message ?? 'Failed'}</p>}
+          {adjustStock.isSuccess && <p className="rounded-md bg-green-50 p-2 text-sm text-green-600">Stock adjusted!</p>}
+          <Button onClick={handleSubmit} isLoading={adjustStock.isPending} disabled={!productId || quantityChange === 0}>
+            Submit Adjustment
           </Button>
         </div>
       </div>
 
-      <p className="text-gray-500">
-        Kelola pencatatan stok masuk (restock) dan stok keluar (terjual manual/rusak) dalam tab yang terpisah.
-      </p>
-
-      {/* Tabs Layout */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('IN')}
-            className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${
-              activeTab === 'IN'
-                ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
-          >
-            Barang Masuk
-          </button>
-          <button
-            onClick={() => setActiveTab('OUT')}
-            className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium ${
-              activeTab === 'OUT'
-                ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            }`}
-          >
-            Barang Keluar
-          </button>
-        </nav>
-      </div>
-
-      <div className="mt-2">
-        {activeTab === 'IN' ? (
-          <StockMovementsTable filterType="IN" />
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 text-lg font-bold text-gray-900">Low Stock Alerts</h3>
+        {lowLoading ? (
+          <p className="text-center text-gray-400">Loading...</p>
+        ) : !lowStock?.length ? (
+          <p className="text-center text-gray-400">All products have sufficient stock</p>
         ) : (
-          <StockMovementsTable filterType="OUT" />
+          <DataTable columns={lowColumns} data={lowStock} keyExtractor={(r) => r.id} />
         )}
       </div>
-
-      <Modal
-        isOpen={modalType !== null}
-        onClose={handleClose}
-        title={modalType === 'IN' ? 'Catat Barang Masuk' : 'Catat Barang Keluar'}
-      >
-        {modalType && (
-          <StockMovementForm 
-            type={modalType} 
-            onSuccess={handleClose} 
-          />
-        )}
-      </Modal>
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={<p className="py-8 text-center text-gray-400">Loading...</p>}>
+      <InventoryContent />
+    </Suspense>
   );
 }

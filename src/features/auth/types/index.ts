@@ -10,16 +10,27 @@ export interface LoginCredentials {
   password: string;
 }
 
-/** Shape returned by POST /auth/login from the NestJS backend */
+/** Shape returned by POST /auth/login (BE sets cookies server-side) */
 export interface LoginResponse {
-  token: string;
-  user: AuthUser;
+  user: AuthUser; // access_token is in HttpOnly cookie, NOT in body
 }
 
-/** Authenticated user profile attached to the JWT */
+/** Shape returned by POST /auth/register */
+export interface RegisterResponse {
+  message: string;
+  user: {
+    id: string;
+    username: string;
+    role: UserRole;
+    tenantId: string;
+    storeName: string;
+  };
+}
+
+/** Authenticated user profile from JWT payload */
 export interface AuthUser {
   id: string;
   username: string;
-  fullName: string;
   role: UserRole;
+  tenantId: string;
 }

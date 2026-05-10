@@ -2,11 +2,13 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/layouts/Sidebar';
 import { DashboardHeader } from '@/components/layouts/DashboardHeader';
+import { AiChatWidget } from '@/features/ai/components/AiChatWidget';
 import type { UserRole } from '@/infrastructure/utils/constants';
 
 // ---
 // Dashboard Layout — Server Component shell
-// Reads user identity from headers set by proxy.ts
+// Menjadi layout utama (hanya dirender di server) buat seluruh halaman dashboard.
+// Di sini juga ngecek siapa yang login (role-nya) dari middleware/proxy headers.
 // ---
 
 export default async function DashboardLayout({
@@ -32,6 +34,9 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+
+      {/* Floating AI Chat Widget — muncul di pojok kanan bawah */}
+      <AiChatWidget />
     </div>
   );
 }

@@ -2,11 +2,11 @@
 
 import { Suspense } from 'react';
 import { useProducts } from '@/features/products/hooks/useProducts';
-import { useCartStore } from '@/features/transactions/store/useCartStore';
+import { useCartStore } from '@/features/sales/store/useCartStore';
 import { useInventorySync } from '@/infrastructure/events/useInventorySync';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { ProductSearchBar } from '@/features/products/components/ProductSearchBar';
-import { CartSidebar } from '@/features/transactions/components/CartSidebar';
+import { CartSidebar } from '@/features/sales/components/CartSidebar';
 
 // ---
 // /dashboard/cashier — Point of Sale terminal

@@ -5,32 +5,29 @@ import { useSearchParams } from 'next/navigation';
 import { apiClient } from '@/infrastructure/api/client';
 import { QUERY_KEYS } from '@/infrastructure/utils/constants';
 import type { Product, ProductQueryParams } from '../types';
-
-// ---
-// useProducts — URL-Driven product list query
-// Reads page/search/sort from URL params, so the NestJS backend receives identical
-// query strings that it can bind directly into SQL queries.
-// ---
+import type { PaginatedResponse } from '@/infrastructure/api/types';
 
 export function useProducts() {
   const searchParams = useSearchParams();
 
   const params: ProductQueryParams = {
     page: Number(searchParams.get('page')) || 1,
-    perPage: Number(searchParams.get('perPage')) || 20,
+    perPage: Number(searchParams.get('perPage')) || 12,
     search: searchParams.get('search') ?? undefined,
     categoryId: searchParams.get('categoryId') ?? undefined,
-    sort: (searchParams.get('sort') as ProductQueryParams['sort']) ?? undefined,
   };
 
-  // Build a clean query string
+  const take = params.perPage ?? 12;
+  const skip = ((params.page ?? 1) - 1) * take;
+
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) qs.set(key, String(value));
-  });
+  qs.set('skip', String(skip));
+  qs.set('take', String(take));
+  if (params.search) qs.set('search', params.search);
+  if (params.categoryId) qs.set('categoryId', params.categoryId);
 
   return useQuery({
     queryKey: [...QUERY_KEYS.products, params],
-    queryFn: () => apiClient<Product[]>(`/products?${qs.toString()}`),
+    queryFn: () => apiClient<PaginatedResponse<Product>>(`/products?${qs.toString()}`),
   });
 }

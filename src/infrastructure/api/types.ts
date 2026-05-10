@@ -1,20 +1,20 @@
-// Universal API response wrapper & pagination types mirroring NestJS backend
+// BE ResponseInterceptor wraps ALL responses:
+//   { statusCode: number, message: string, data: T, timestamp: string }
+// apiClient extracts .data automatically — callers receive T directly.
 export interface ApiResponse<T> {
-  success: boolean;
+  statusCode: number;
   message: string;
   data: T;
-  meta?: PaginationMeta;
+  timestamp: string;
 }
 
-// Pagination metadata for list endpoints
-export interface PaginationMeta {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  perPage: number;
+// Paginated list response from BE (e.g. /products, /categories)
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
 }
 
-// Standardized error body with errorCode to prevent brittle string matching
+// Standardized error body
 export interface ApiError {
   errorCode: string;
   message: string;

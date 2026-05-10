@@ -1,37 +1,37 @@
-import type { Product } from '@/features/products/types';
-
 // ---
-// Transaction Domain Types
+// Transaction Domain Types — match BE DTOs
 // ---
 
-/** A single item within a transaction */
+export type TransactionStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
+
 export interface TransactionItem {
+  id: string;
   productId: string;
-  productName: string;
+  product: {
+    id: string;
+    name: string;
+    sku: string;
+  };
   quantity: number;
   unitPrice: number;
-  subtotal: number;
 }
 
-/** Full transaction record returned by the backend */
 export interface Transaction {
   id: string;
+  orderNumber: string;
+  totalPrice: number;
+  status: TransactionStatus;
+  user: {
+    id: string;
+    username: string;
+  };
   items: TransactionItem[];
-  totalAmount: number;
-  cashierId: string;
-  cashierName?: string;
   createdAt: string;
 }
 
-/** Payload sent to POST /transactions */
-export interface CreateTransactionPayload {
-  items: {
-    productId: string;
-    quantity: number;
-  }[];
-}
-
-/** Cart item extends Product with a mutable quantity */
-export interface CartItem extends Product {
-  cartQuantity: number;
+export interface TransactionQueryParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  status?: TransactionStatus;
 }

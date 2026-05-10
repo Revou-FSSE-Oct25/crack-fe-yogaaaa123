@@ -16,7 +16,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart, showActions = false }: ProductCardProps) {
-  const isOutOfStock = product.stock <= 0;
+  const isOutOfStock = product.stockQuantity <= 0;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -35,7 +35,7 @@ export function ProductCard({ product, onAddToCart, showActions = false }: Produ
         </p>
 
         <p className={`text-xs ${isOutOfStock ? 'text-red-500' : 'text-gray-500'}`}>
-          {isOutOfStock ? 'Out of stock' : `Stock: ${product.stock}`}
+          {isOutOfStock ? 'Out of stock' : `Stock: ${product.stockQuantity}`}
         </p>
 
         {showActions && onAddToCart && (
