@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react';
 
-// ---
-// DataTable — Lightweight table wrapper for admin data views
-// Accepts generic column definitions and rows.
-// ---
-
 export interface Column<T> {
   header: string;
   accessor: keyof T | ((row: T) => ReactNode);
@@ -25,37 +20,41 @@ export function DataTable<T>({
   emptyMessage = 'No data available.',
 }: DataTableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-sm">
+      <table className="min-w-full divide-y divide-slate-100">
+        <thead className="bg-slate-50/50">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.header}
-                className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 ${col.className ?? ''}`}
+                className={`px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 ${col.className ?? ''}`}
               >
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100 bg-white">
+        <tbody className="divide-y divide-slate-100">
           {data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-8 text-center text-sm text-gray-400"
+                className="px-4 py-8 text-center text-sm text-slate-400"
               >
                 {emptyMessage}
               </td>
             </tr>
           ) : (
-            data.map((row) => (
-              <tr key={keyExtractor(row)} className="hover:bg-gray-50 transition-colors">
+            data.map((row, i) => (
+              <tr
+                key={keyExtractor(row)}
+                className="transition-colors hover:bg-slate-50/50"
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
                 {columns.map((col) => (
                   <td
                     key={col.header}
-                    className={`whitespace-nowrap px-4 py-3 text-sm text-gray-700 ${col.className ?? ''}`}
+                    className={`whitespace-nowrap px-4 py-3 text-sm text-slate-600 ${col.className ?? ''}`}
                   >
                     {typeof col.accessor === 'function'
                       ? col.accessor(row)

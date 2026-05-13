@@ -29,5 +29,7 @@ export function useActivityLog() {
   return useQuery({
     queryKey: ['activity-log', params],
     queryFn: () => apiClient<PaginatedResponse<ActivityLogEntry>>(`/activity-log?${qs.toString()}`),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   });
 }
