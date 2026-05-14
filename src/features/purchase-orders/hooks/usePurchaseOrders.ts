@@ -26,6 +26,6 @@ export function usePurchaseOrders() {
 
   return useQuery({
     queryKey: ['purchase-orders', params],
-    queryFn: () => apiClient<PurchaseOrder[]>(`/purchase-orders?${qs.toString()}`),
+    queryFn: () => apiClient<PurchaseOrder[]>(`/purchase?${qs.toString()}`),
   });
 }

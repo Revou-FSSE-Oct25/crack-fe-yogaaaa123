@@ -15,7 +15,7 @@ export function useCreatePurchaseOrder() {
   return useMutation({
     mutationFn: (data: CreatePurchaseOrderFormInput) =>
       apiClient<PurchaseOrder>(
-        '/purchase-orders',
+        '/purchase',
         { method: 'POST', body: JSON.stringify(transformPurchaseOrderToApi(data)) },
         true, // idempotent
       ),

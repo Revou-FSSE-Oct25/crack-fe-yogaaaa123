@@ -101,7 +101,7 @@ export function PurchaseOrderList() {
         <div className="rounded-lg border border-gray-200 bg-blue-50 p-4 shadow-sm">
           <p className="text-sm text-blue-700">Total Value</p>
           <p className="text-xl font-bold text-blue-900">
-            {formatCurrency(filteredOrders.reduce((sum, o) => sum + o.totalAmount, 0))}
+            {formatCurrency(filteredOrders.reduce((sum, o) => sum + Number(o.totalPrice), 0))}
           </p>
         </div>
       </div>
@@ -149,7 +149,7 @@ export function PurchaseOrderList() {
                     {order.supplier.name}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
-                    {formatCurrency(order.totalAmount)}
+                    {formatCurrency(Number(order.totalPrice))}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusColors[order.status]}`}>

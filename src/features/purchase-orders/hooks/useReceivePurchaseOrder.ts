@@ -11,7 +11,7 @@ export function useReceivePurchaseOrder() {
   return useMutation({
     mutationFn: (id: string) =>
       apiClient<PurchaseOrder>(
-        `/purchase-orders/${id}/receive`,
+        `/purchase/${id}/receive`,
         { method: 'POST' },
         true, // idempotent
       ),

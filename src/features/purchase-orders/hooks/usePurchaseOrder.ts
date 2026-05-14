@@ -7,7 +7,7 @@ import type { PurchaseOrder } from '../types';
 export function usePurchaseOrder(id: string) {
   return useQuery({
     queryKey: ['purchase-orders', id],
-    queryFn: () => apiClient<PurchaseOrder>(`/purchase-orders/${id}`),
+    queryFn: () => apiClient<PurchaseOrder>(`/purchase/${id}`),
     enabled: !!id,
   });
 }

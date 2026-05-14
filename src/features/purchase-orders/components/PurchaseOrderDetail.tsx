@@ -94,7 +94,7 @@ export function PurchaseOrderDetail({ id }: PurchaseOrderDetailProps) {
           </div>
           <div>
             <dt className="text-sm font-medium text-gray-500">Total Amount</dt>
-            <dd className="mt-1 text-lg font-bold text-gray-900">{formatCurrency(order.totalAmount)}</dd>
+            <dd className="mt-1 text-lg font-bold text-gray-900">{formatCurrency(Number(order.totalPrice))}</dd>
           </div>
           {order.notes && (
             <div className="sm:col-span-2">
@@ -137,7 +137,7 @@ export function PurchaseOrderDetail({ id }: PurchaseOrderDetailProps) {
                   Total:
                 </td>
                 <td className="px-4 py-3 text-right text-lg font-bold text-gray-900">
-                  {formatCurrency(order.totalAmount)}
+                  {formatCurrency(Number(order.totalPrice))}
                 </td>
               </tr>
             </tfoot>

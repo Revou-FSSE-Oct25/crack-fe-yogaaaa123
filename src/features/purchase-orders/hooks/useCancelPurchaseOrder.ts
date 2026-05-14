@@ -10,7 +10,7 @@ export function useCancelPurchaseOrder() {
   return useMutation({
     mutationFn: (id: string) =>
       apiClient<PurchaseOrder>(
-        `/purchase-orders/${id}/cancel`,
+        `/purchase/${id}/cancel`,
         { method: 'POST' },
         true, // idempotent
       ),

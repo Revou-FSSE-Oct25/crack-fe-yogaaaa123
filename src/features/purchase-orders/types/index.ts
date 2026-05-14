@@ -27,7 +27,7 @@ export interface PurchaseOrder {
     contactName?: string;
   };
   status: PurchaseOrderStatus;
-  totalAmount: number;
+  totalPrice: string;
   items: PurchaseOrderItem[];
   notes?: string;
   createdAt: string;

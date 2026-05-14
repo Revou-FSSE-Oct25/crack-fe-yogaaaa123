@@ -22,10 +22,20 @@ export const createPurchaseOrderSchema = z.object({
 
 export type CreatePurchaseOrderFormInput = z.infer<typeof createPurchaseOrderSchema>;
 
+function generateOrderNumber(): string {
+  const now = new Date();
+  const yy = now.getFullYear().toString().slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const seq = String(Date.now()).slice(-4);
+  return `PO-${yy}${mm}${dd}-${seq}`;
+}
+
 /** Transform purchase order data to API format (convert numbers to strings) */
 export function transformPurchaseOrderToApi(data: CreatePurchaseOrderFormInput) {
   return {
     ...data,
+    orderNumber: generateOrderNumber(),
     items: data.items.map(item => ({
       ...item,
       quantity: item.quantity.toString(),
