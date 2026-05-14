@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # Frontend - Next.js 16
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crackpos-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Next.js environment
+      NODE_ENV: production
+      
+      NEXT_PUBLIC_API_URL: http://host.docker.internal:8080/api
+      
+      # JWT Secret (must match backend)
+      JWT_SECRET: crackpos-jwt-secret-k3y-2026-very-strong-random
+      
+      # Optional: AI API URL
+      NEXT_PUBLIC_AI_URL: http://host.docker.internal:8001
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Network
+    networks:
+      - crackpos-network
+
+  # Backend - NestJS (optional, untuk reference)
+  # backend:
+  #   image: crackpos-backend:latest
+  #   container_name: crackpos-backend
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     NODE_ENV: production
+  #     DATABASE_URL: postgresql://user:password@postgres:5432/crackpos
+  #     JWT_SECRET: crackpos-jwt-secret-k3y-2026-very-strong-random
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - crackpos-network
+
+  # PostgreSQL Database (optional)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: crackpos-postgres
+  #   environment:
+  #     POSTGRES_USER: crackpos_user
+  #     POSTGRES_PASSWORD: crackpos_password
+  #     POSTGRES_DB: crackpos
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - crackpos-network
+
+networks:
+  crackpos-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:

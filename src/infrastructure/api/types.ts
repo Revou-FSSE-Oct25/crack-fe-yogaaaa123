@@ -1,34 +1,20 @@
-// ============================================================================
-// Standardized API Response & Error Contracts
-// These generic types mirror the NestJS backend's response wrapper.
-// ============================================================================
-
-/**
- * Universal API response wrapper.
- * Every endpoint from the NestJS backend returns this shape.
- */
+// BE ResponseInterceptor wraps ALL responses:
+//   { statusCode: number, message: string, data: T, timestamp: string }
+// apiClient extracts .data automatically — callers receive T directly.
 export interface ApiResponse<T> {
-  success: boolean;
+  statusCode: number;
   message: string;
   data: T;
-  meta?: PaginationMeta;
+  timestamp: string;
 }
 
-/**
- * Pagination metadata attached to list endpoints.
- */
-export interface PaginationMeta {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  perPage: number;
+// Paginated list response from BE (e.g. /products, /categories)
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
 }
 
-/**
- * Standardized error body returned by the NestJS backend.
- * The `errorCode` field allows the frontend to react to specific domain errors
- * (e.g. 'ERR_INSUFFICIENT_STOCK') without brittle string matching on `message`.
- */
+// Standardized error body
 export interface ApiError {
   errorCode: string;
   message: string;

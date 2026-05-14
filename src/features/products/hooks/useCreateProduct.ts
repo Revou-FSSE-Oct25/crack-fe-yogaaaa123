@@ -5,11 +5,13 @@ import { apiClient } from '@/infrastructure/api/client';
 import { QUERY_KEYS } from '@/infrastructure/utils/constants';
 import type { Product } from '../types';
 import type { CreateProductInput } from '../schemas/productSchema';
+import { transformProductToApi } from '../schemas/productSchema';
 
-// ============================================================================
-// useCreateProduct — Mutation with automatic cache invalidation
-// Uses idempotency key to prevent duplicate product creation.
-// ============================================================================
+// ---
+// useCreateProduct — Hook buat nambah produk baru.
+// Otomatis hapus cache produk lama dan fetch ulang (invalidateQueries) tiap kali sukses,
+// biar list produk di UI langsung update tanpa perlu direfresh manual.
+// ---
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
@@ -18,7 +20,7 @@ export function useCreateProduct() {
     mutationFn: (data: CreateProductInput) =>
       apiClient<Product>(
         '/products',
-        { method: 'POST', body: JSON.stringify(data) },
+        { method: 'POST', body: JSON.stringify(transformProductToApi(data)) },
         true, // idempotent — generates Idempotency-Key header
       ),
 

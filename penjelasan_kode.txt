@@ -1,0 +1,250 @@
+================================================================================
+1. src/app/dashboard/layout.tsx
+================================================================================
+Penjelasan:
+File ini adalah komponen Layout untuk halaman Dashboard (Server Component). Fungsinya adalah sebagai pembungkus halaman-halaman yang ada di dalam dashboard. Komponen ini:
+- Membaca identitas role pengguna dari HTTP headers (x-user-role) yang diset oleh proxy/middleware.
+- Jika pengguna tidak memiliki role (belum login), maka akan diarahkan (redirect) kembali ke halaman `/login`.
+- Jika sudah login, akan menampilkan struktur layout dashboard yang terdiri dari `Sidebar` di sebelah kiri, `DashboardHeader` di atas, dan konten utama (`children`) di bagian tengah.
+- Menggunakan Tailwind CSS untuk styling tampilan antar muka secara cepat.
+
+Kode:
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { Sidebar } from '@/components/layouts/Sidebar';
+import { DashboardHeader } from '@/components/layouts/DashboardHeader';
+import type { UserRole } from '@/infrastructure/utils/constants';
+
+// ============================================================================
+// Dashboard Layout — Server Component shell
+// Reads user identity from headers set by proxy.ts
+// ============================================================================
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const headersList = await headers();
+  const role = headersList.get('x-user-role') as UserRole | null;
+
+  if (!role) {
+    redirect('/login');
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <Sidebar role={role} />
+
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <DashboardHeader role={role} />
+
+        <main className="flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+2. src/app/(auth)/login/page.tsx
+================================================================================
+Penjelasan:
+File ini adalah halaman (page) untuk Login pengguna (frontend route: `/login`).
+- Mengatur meta title halaman untuk SEO atau browser tab menjadi "Login — CrackPOS".
+- Menampilkan user interface (UI) antarmuka form login di tengah layar dengan background abu/indigo gradient dan efek shadow melingkar yang memanfaatkan kelas Tailwind CSS.
+- Memanggil komponen `<LoginForm />` (di-import dari features/auth) yang berisi input email, password, dan tombol submit. File ini sebatas representasi tampilan luar dari form tersebut.
+
+Kode:
+import type { Metadata } from 'next';
+import { LoginForm } from '@/features/auth/components/LoginForm';
+
+export const metadata: Metadata = {
+  title: 'Login — CrackPOS',
+};
+
+// ============================================================================
+// /login — Public login page
+// ============================================================================
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+        {/* Branding */}
+        <div className="mb-8 text-center">
+          <span className="text-4xl">💎</span>
+          <h1 className="mt-3 text-2xl font-bold text-gray-900">CrackPOS</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Sign in to your account
+          </p>
+        </div>
+
+        <LoginForm />
+      </div>
+    </div>
+  );
+}
+
+
+================================================================================
+3. src/features/transactions/hooks/useCreateTransaction.ts
+================================================================================
+Penjelasan:
+File ini berisi TypeScript custom hook (bernama `useCreateTransaction`) yang memanfaatkan `@tanstack/react-query` untuk menyelesaikan/membayar transaksi di kasir POS.
+Proses utamanya:
+1. Mengambil item yang ada di keranjang/cart (dari global state Zustand `useCartStore`).
+2. Digunakan untuk merubah/memformat cart tadi menjadi bentuk request (Data Transfer Object) berisi `productId` dan `quantity`.
+3. Memanggil API ke endpoint `/transactions` dengan HTTP method POST. Hook ini menetapkan parameter ke-3 klien API menjadi `true`, yang berarti transaksi ini _idempotent_ (aman jika tombol dipencet dobel secara tidak sengaja, id payment tidak akan tertagih dua kali).
+4. Jika transaksi berhasil ditekan bayar dan kembali HTTP 2xx (`onSuccess`), akan segera mengosongkan keranjang di frontend (`clearCart()`) dan me-refresh data daftar produk (`products`) dan daftar transaksi (`transactions`) agar stok dan riwayat mutasi terbaru bisa langsung diambil dari backend.
+
+Kode:
+'use client';
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/infrastructure/api/client';
+import { QUERY_KEYS } from '@/infrastructure/utils/constants';
+import { useCartStore } from '../store/useCartStore';
+import type { Transaction, CreateTransactionPayload } from '../types';
+
+// ============================================================================
+// useCreateTransaction — Checkout mutation
+// 1. Builds the payload from the Zustand cart
+// 2. Posts with an Idempotency-Key to prevent double-charging
+// 3. Clears the cart and refreshes product stock on success
+// ============================================================================
+
+export function useCreateTransaction() {
+  const queryClient = useQueryClient();
+  const clearCart = useCartStore((s) => s.clearCart);
+
+  return useMutation({
+    mutationFn: () => {
+      const items = useCartStore.getState().items;
+
+      const payload: CreateTransactionPayload = {
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.cartQuantity,
+        })),
+      };
+
+      return apiClient<Transaction>(
+        '/transactions',
+        { method: 'POST', body: JSON.stringify(payload) },
+        true, // idempotent — attach Idempotency-Key header
+      );
+    },
+
+    onSuccess: () => {
+      // Empty cart after successful checkout
+      clearCart();
+
+      // Refresh product stock and transaction history
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.products });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.transactions });
+    },
+  });
+}
+
+
+================================================================================
+4. src/features/transactions/schemas/transactionSchema.ts
+================================================================================
+Penjelasan:
+File ini berisi definisi bentuk validasi (Schema validation) menggunakan library _Zod_ saat memproses form transaksi (checkout) agar memastikan kebenaran data dari sisi TypeScript/Frontend sebelum dikirim ke backend API. 
+Skema di sana menetapkan aturan:
+- Skema _Item Transaksi_ (`transactionItemSchema`) mewajibkan `productId` ada dengan format string UUID yang valid dan tipe angka kuantitas (`quantity`) harus lebih besar / minimal 1.
+- Skema _Buat Transaksi_ (`createTransactionSchema`) mengharuskan agar keranjang item yang akan diproses adalah Array murni dengan format isi _Item Transaksi_, dan array tersebut tidak boleh kosong (minimal isi 1 item produk).
+- TypeScript Type (`CreateTransactionInput`) yang auto digenerate dari schema Zod tersebut diexport sebagai type interface standar untuk aplikasi. Ini harus persis dan simetris dengan NestJS Class-validator yang mungkin ada di backend app.
+
+Kode:
+import { z } from 'zod';
+
+// ============================================================================
+// Transaction Schema — Symmetrical blueprint for NestJS backend validation
+// NestJS equivalent (class-validator):
+//   @IsArray() @ValidateNested({ each: true }) items: TransactionItemDto[];
+//   @IsUUID()                                  productId: string;
+//   @IsInt() @Min(1)                           quantity: number;
+// ============================================================================
+
+const transactionItemSchema = z.object({
+  productId: z.string().uuid('Invalid product ID'),
+  quantity: z.number().int().positive('Quantity must be at least 1'),
+});
+
+export const createTransactionSchema = z.object({
+  items: z
+    .array(transactionItemSchema)
+    .min(1, 'Cart must contain at least one item'),
+});
+
+export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+
+
+================================================================================
+5. src/features/products/components/ProductSearchBar.tsx
+================================================================================
+Penjelasan:
+File ini adalah komponen React yang ditujukan sebagai _Input Pencarian Produk (Search Bar)_ yang digerakkan oleh perubahan link URL browser di Next.js (secara URL-driven). Komponen ini:
+- Memiliki efek fungsi `handleSearch` yang aktif jika pengguna mengetik huruf apa saja di kolom TextBox input.
+- Segala tesk pencarian yang dimasukkan pengguna akan disisipkan ke Query URL parameter `?search=xxxx` menggunakan fitur replace Nextjs (`router.replace`), sementara value Parameter Pagination halaman `?page=` akan di set otomatis ke 1 (ke halaman utama).
+- Jika Textbox dikosongkan (di-backspace), maka parameter search-nya dihilangkan. 
+- Komponen hanya memasukkan string ke parameter URL saja. Data sebenarnya secara reaktif akan diperbarui oleh hook React-query `useProducts()` yang ada di file lainnya karena ia membaca parameter `?search` atau query string dari Nest JS backend secara simultan.
+
+Kode:
+'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+
+// ============================================================================
+// ProductSearchBar — URL-driven search input
+// Updates the browser URL, which passively drives TanStack Query via
+// useProducts() hook. The NestJS backend receives the same query string.
+// ============================================================================
+
+export function ProductSearchBar() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (e.target.value) {
+      params.set('search', e.target.value);
+      params.set('page', '1'); // Reset to first page on new search
+    } else {
+      params.delete('search');
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  return (
+    <div className="relative">
+      <svg
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search products…"
+        defaultValue={searchParams.get('search') ?? ''}
+        onChange={handleSearch}
+        className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+    </div>
+  );
+}

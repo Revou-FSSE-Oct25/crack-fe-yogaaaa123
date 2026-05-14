@@ -1,0 +1,1 @@
+export { useDeleteSupplier } from './useCreateSupplier';

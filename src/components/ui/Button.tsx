@@ -2,13 +2,12 @@
 
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
 
-// ============================================================================
-// Button — Shared primitive component
-// Variants: primary | secondary | danger | ghost
-// Sizes:    sm | md | lg
-// ============================================================================
+// ---
+// Button — Komponen tombol reusable yang dipakai di seluruh project.
+// Punya beberapa variasi style (variant) dan ukuran (size). Tinggal panggil aja!
+// ---
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline-danger';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,13 +18,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500',
+    'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 focus-visible:ring-blue-500 shadow-md hover:shadow-lg transition-all',
   secondary:
-    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus-visible:ring-indigo-500',
+    'bg-slate-100 text-slate-900 border border-slate-200 hover:bg-slate-200 focus-visible:ring-slate-500',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
+    'bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 focus-visible:ring-red-500 shadow-md hover:shadow-lg transition-all',
   ghost:
-    'bg-transparent text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-400',
+    'bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400',
+  success:
+    'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 focus-visible:ring-green-500 shadow-md hover:shadow-lg transition-all',
+  'outline-danger':
+    'bg-white text-red-600 border-2 border-red-600 hover:bg-red-50 focus-visible:ring-red-500',
 };
 
 const sizeClasses: Record<Size, string> = {
