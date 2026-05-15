@@ -1,240 +1,211 @@
-# 💎 CrackPOS — Inventory & Point of Sale System
+# 💎 CrackPOS — Frontend
 
-A production-ready frontend for an Inventory Management and Point of Sale (POS) system, built with **Next.js 16 App Router** and designed for seamless integration with a NestJS backend.
+Frontend untuk sistem **Inventory Management & Point of Sale (POS)**, dibangun dengan **Next.js 16 App Router** dan terintegrasi dengan backend NestJS.
 
 ## Tech Stack
 
-| Layer | Technology |
+| Layer | Teknologi |
 |---|---|
 | Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript 5 (strict mode) |
+| Bahasa | TypeScript 5 (strict mode) |
 | Styling | Tailwind CSS 4 |
-| State Management | Zustand (client cart state) |
-| Server Data Fetching | TanStack React Query |
-| Forms & Validation | React Hook Form + Zod 4 |
-| Auth Gateway | `proxy.ts` (Next.js 16 middleware replacement) |
-| JWT Verification | jose (Edge-compatible) |
+| State Management | Zustand (client cart) |
+| Server Data | TanStack React Query |
+| Forms | React Hook Form + Zod |
+| Auth Gateway | `middleware.ts` (Edge) |
+| JWT Verify | jose |
 
----
+## Fitur
 
-## Getting Started
+### Admin Dashboard (`/dashboard/admin/*`)
+- **Overview** — Statistik toko (total produk, stok, revenue, low stock)
+- **Products** — CRUD produk, search, kategori
+- **Categories** — CRUD kategori
+- **Suppliers** — CRUD supplier
+- **Purchase Orders** — Buat & manage PO, receive stock otomatis
+- **Returns** — Catat retur barang
+- **Transactions** — Riwayat transaksi penjualan
+- **Reports** — Sales Report, Inventory Report, Profit & Loss (dengan filter tanggal & export CSV)
+- **Inventory** — Adjust stok (damaged/lost/found/manual)
+- **Employees** — Manage user (admin/staff)
+- **Activity Log** — Audit trail (siapa ngapain kapan)
+- **AI Product Input** — Upload gambar produk, AI ekstrak detail otomatis
+
+### Cashier / POS (`/dashboard/cashier`)
+- Terminal POS dengan grid produk + cart sidebar (Zustand)
+- Checkout dengan quantity management
+- Riwayat transaksi kasir
+
+### Auth
+- Login dengan JWT (cookie-based)
+- Register toko baru
+- Google OAuth
+- Super Admin panel
+
+## Struktur Proyek
+
+```
+src/
+├── app/                            # Next.js App Router
+│   ├── (auth)/login/               # → /login
+│   ├── (auth)/create-store/        # → /create-store
+│   ├── dashboard/admin/*           # → /dashboard/admin/...
+│   ├── dashboard/cashier/          # → /dashboard/cashier
+│   ├── super-admin/                # → /super-admin/...
+│   └── layout.tsx                  # Root layout
+│
+├── components/                     # Shared UI
+│   ├── ui/                         # Button, Input, Modal, DataTable
+│   └── layouts/                    # Sidebar, DashboardHeader
+│
+├── features/                       # Domain logic per fitur
+│   ├── auth/                       # Login form, mutation, Google OAuth
+│   ├── products/                   # CRUD, search, form
+│   ├── sales/                      # Cart (Zustand store), checkout
+│   ├── purchase-orders/            # PO form, list, detail
+│   ├── reports/                    # Sales, Inventory, Profit & Loss
+│   ├── activity-log/               # Audit trail table + filter
+│   └── ...                         # categories, suppliers, returns, etc
+│
+├── infrastructure/                 # Global utilities
+│   ├── api/                        # API client, CSRF, types
+│   └── utils/                      # Constants, formatter (IDR)
+│
+└── middleware.ts                   # Auth gateway (JWT + RBAC)
+```
+
+## Route Map
+
+| Route | Akses | Deskripsi |
+|---|---|---|
+| `/login` | Public | Halaman login |
+| `/register` | Public | Registrasi |
+| `/create-store` | Public | Buat toko baru |
+| `/dashboard/admin` | Admin | Overview dashboard |
+| `/dashboard/admin/products` | Admin | Manajemen produk |
+| `/dashboard/admin/categories` | Admin | Manajemen kategori |
+| `/dashboard/admin/suppliers` | Admin | Manajemen supplier |
+| `/dashboard/admin/purchase-orders` | Admin | Purchase orders |
+| `/dashboard/admin/returns` | Admin | Retur barang |
+| `/dashboard/admin/transactions` | Admin | Riwayat transaksi |
+| `/dashboard/admin/reports` | Admin | Laporan (sales/inventory/profit-loss) |
+| `/dashboard/admin/inventory` | Admin | Adjust stok |
+| `/dashboard/admin/employees` | Admin | Kelola pegawai |
+| `/dashboard/admin/activity-log` | Admin | Catatan aktivitas |
+| `/dashboard/admin/ai-product` | Admin | Input produk via AI |
+| `/dashboard/cashier` | Staff | Terminal POS |
+| `/dashboard/cashier/transactions` | Staff | Riwayat transaksi kasir |
+| `/super-admin/login` | Public | Login super admin |
+| `/super-admin/dashboard` | Super Admin | Panel super admin |
+| `/super-admin/tenants` | Super Admin | Kelola tenant |
+
+## Persiapan
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) v1.3+
-- Node.js 20+ (for Next.js compatibility)
+- Node.js 20+
+- Bun atau npm
 
-### Installation
+### Install
 
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd crack-fe-yogaaaa123
-
-# Install dependencies
 bun install
+# atau
+npm install
 ```
 
 ### Environment Variables
 
-Create a `.env.local` file in the project root:
+Buat `.env.local`:
 
 ```env
-# Backend API base URL
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+# Backend API
+NEXT_PUBLIC_API_URL=http://localhost:8080
 
-# JWT secret (must match the NestJS backend)
-JWT_SECRET=your-jwt-secret-key-here
+# AI Service
+NEXT_PUBLIC_AI_URL=http://localhost:8001
+
+# JWT Secret (harus sama dengan backend)
+JWT_SECRET=crackpos-jwt-secret-k3y-2026-very-strong-random
 ```
+
+> File `.env.local` untuk development lokal, `.env.docker` untuk environment Docker.
 
 ### Development
 
 ```bash
+npm run dev
+# atau
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Akses [http://localhost:3000](http://localhost:3000).
 
 ### Production Build
 
 ```bash
-bun run build
-bun run start
+npm run build
+npm run start
 ```
 
----
+## Integrasi Backend
 
-## Project Architecture
+### Format Response
 
-The project follows a **feature-based architecture** with strict separation between UI components, domain logic, and infrastructure.
+Semua API backend NestJS menggunakan format:
 
-```
-src/
-├── app/                        # App Layer — Next.js App Router
-│   ├── (auth)/login/           # → /login (public)
-│   ├── dashboard/
-│   │   ├── layout.tsx          # Dashboard shell (Server Component)
-│   │   ├── admin/              # Admin routes
-│   │   │   ├── page.tsx        # → /dashboard/admin
-│   │   │   ├── products/       # → /dashboard/admin/products
-│   │   │   └── reports/        # → /dashboard/admin/reports
-│   │   └── cashier/            # Employee routes
-│   │       ├── page.tsx        # → /dashboard/cashier
-│   │       └── transaction/    # → /dashboard/cashier/transaction
-│   └── layout.tsx              # Root layout (AppProviders)
-│
-├── components/                 # Component Layer — Shared UI
-│   ├── ui/                     # Button, Input, Modal, DataTable
-│   ├── layouts/                # Sidebar, DashboardHeader
-│   └── providers/              # AppProviders (QueryClientProvider)
-│
-├── features/                   # Feature Layer — Domain Logic
-│   ├── auth/                   # Login form, mutation, schema
-│   ├── products/               # CRUD, search, product cards
-│   └── transactions/           # Cart (Zustand), checkout, history
-│
-├── infrastructure/             # Infrastructure Layer — Global Utilities
-│   ├── api/                    # API client, response/error types
-│   ├── events/                 # SSE inventory sync
-│   └── utils/                  # Constants, formatters
-│
-└── proxy.ts                    # Auth gateway (JWT + RBAC)
-```
-
----
-
-## Routing & Authentication
-
-### Route Map
-
-| Route | Access | Description |
-|---|---|---|
-| `/login` | Public | Login page |
-| `/dashboard/admin` | Admin only | Overview with stats |
-| `/dashboard/admin/products` | Admin only | Product management (CRUD) |
-| `/dashboard/admin/reports` | Admin only | Sales reports |
-| `/dashboard/cashier` | Employee only | POS terminal (product grid + cart) |
-| `/dashboard/cashier/transaction` | Employee only | Transaction history |
-
-### Authentication Flow
-
-1. User submits credentials on `/login`
-2. NestJS backend validates and returns JWT via `Set-Cookie` header
-3. Client redirects to the appropriate dashboard based on user role
-4. `proxy.ts` intercepts all subsequent requests:
-   - Verifies JWT from `auth_token` cookie
-   - Redirects unauthenticated users to `/login`
-   - Enforces role-based access (Admin ↔ Employee)
-   - Forwards `x-user-role` and `x-user-id` headers to Server Components
-
-### Role-Based Access Control
-
-```
-proxy.ts (Edge Layer)
-  ├── Admin trying /dashboard/cashier/* → redirect to /dashboard/admin
-  ├── Employee trying /dashboard/admin/* → redirect to /dashboard/cashier
-  └── Unauthenticated → redirect to /login
-```
-
----
-
-## Backend Integration Patterns
-
-### 1. Standardized API Contracts
-
-Every API call uses a unified response shape:
-
-```typescript
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-  meta?: { currentPage, totalPages, totalItems, perPage };
-}
-
-interface ApiError {
-  errorCode: string;   // e.g. 'ERR_INSUFFICIENT_STOCK'
-  message: string;
-  validationErrors?: Record<string, string[]>;
+```json
+{
+  "statusCode": 200,
+  "message": "Success",
+  "data": { ... },
+  "timestamp": "2026-01-01T00:00:00.000Z"
 }
 ```
 
-> The NestJS backend only needs a single generic response interceptor.
+Frontend `apiClient` otomatis extract `data` dari response wrapper.
 
-### 2. Idempotency Keys
+### Pagination
 
-All mutation requests (`POST`, `PUT`, `PATCH`) automatically attach a UUID `Idempotency-Key` header to prevent duplicate transactions from network retries or double-clicks.
+Endpoint dengan pagination return:
 
-### 3. URL-Driven State
-
-Table filters, search, sorting, and pagination are stored in URL search params (`?page=1&search=coffee&sort=price_desc`), NOT in client state. Benefits:
-- Page refresh preserves filters
-- Deep-linking works out of the box
-- NestJS backend can bind query params directly with `@Query()` decorators
-
-### 4. Symmetrical Zod Validation
-
-Frontend Zod schemas document NestJS class-validator decorators in comments:
-
-```typescript
-// Frontend (Zod)
-price: z.number().int().positive()
-
-// NestJS equivalent (class-validator):
-// @IsInt() @Min(1) price: number;
+```json
+{
+  "data": [ ... ],
+  "total": 50
+}
 ```
 
-### 5. Real-Time Sync (SSE Ready)
+### Idempotency
 
-The `useInventorySync` hook listens for `STOCK_UPDATED` events via Server-Sent Events and automatically invalidates TanStack Query caches, preventing overselling across terminals.
+Mutation request otomatis attach `Idempotency-Key` header (UUID) untuk mencegah duplikasi transaksi.
 
----
+### Query Params
 
-## Cart System
+Filter, search, dan pagination pakai URL search params (`?page=1&search=...`), bukan client state.
 
-The cart is managed by a **Zustand store** (`useCartStore`) with the following capabilities:
+## Cart System (Zustand)
 
-| Action | Description |
+Cart di `src/features/sales/store/useCartStore.ts`:
+
+| Method | Deskripsi |
 |---|---|
-| `addItem(product)` | Adds product to cart (or increments quantity, capped at stock) |
-| `removeItem(productId)` | Removes item from cart |
-| `updateQuantity(productId, qty)` | Sets quantity (auto-removes if 0, capped at stock) |
-| `clearCart()` | Empties the cart |
-| `getTotalPrice()` | Calculates sum of `price × quantity` |
-| `getItemCount()` | Returns total number of items |
-
-Checkout sends `POST /transactions` with an `Idempotency-Key` header, then clears the cart and refreshes product stock.
-
----
-
-## Key Dependencies
-
-| Package | Version | Purpose |
-|---|---|---|
-| `next` | 16.1.6 | Framework |
-| `react` | 19.2.3 | UI library |
-| `zustand` | 5.x | Client state (cart) |
-| `@tanstack/react-query` | 5.x | Server state / data fetching |
-| `react-hook-form` | 7.x | Form management |
-| `@hookform/resolvers` | 5.x | Zod ↔ RHF bridge |
-| `zod` | 4.x | Schema validation |
-| `jose` | 6.x | Edge-compatible JWT verification |
-| `uuid` | 13.x | Idempotency key generation |
-| `tailwindcss` | 4.x | Styling |
-
----
+| `addItem(product)` | Tambah produk (atau increment qty) |
+| `removeItem(productId)` | Hapus item |
+| `updateQuantity(productId, qty)` | Set qty |
+| `clearCart()` | Kosongkan cart |
+| `getTotalPrice()` | Total harga |
+| `getItemCount()` | Total item |
 
 ## Scripts
 
 ```bash
-bun run dev      # Start development server (Turbopack)
-bun run build    # Production build
-bun run start    # Start production server
-bun run lint     # Run ESLint
+npm run dev      # Dev server (port 3000)
+npm run build    # Production build
+npm run start    # Start production server
+npm run lint     # ESLint
 ```
 
----
+## Lisensi
 
-## License
-
-This project is part of the Crack Final Project.
+Bagian dari proyek final Crack.
