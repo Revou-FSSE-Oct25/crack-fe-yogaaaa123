@@ -31,6 +31,18 @@ export function useProfitLossReport() {
 
   return useQuery({
     queryKey: ['profit-loss-report', startDate, endDate],
-    queryFn: () => apiClient<ProfitLossReport>(`/reports/profit-loss?${qs.toString()}`),
+    queryFn: async () => {
+      const res = await apiClient<{
+        totalRevenue: number;
+        totalCogs: number;
+        totalProfit: number;
+      }>(`/reports/profit-loss?${qs.toString()}`);
+
+      return {
+        income: { sales: res.totalRevenue, other: 0, total: res.totalRevenue },
+        expenses: { cogs: res.totalCogs, purchases: 0, other: 0, total: res.totalCogs },
+        netProfit: res.totalProfit,
+      } satisfies ProfitLossReport;
+    },
   });
 }

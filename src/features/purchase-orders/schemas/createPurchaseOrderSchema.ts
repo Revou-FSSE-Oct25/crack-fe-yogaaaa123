@@ -2,8 +2,6 @@ import { z } from 'zod';
 
 // ---
 // Purchase Order Schema — Zod validation for create/edit forms
-// NestJS backend expects quantity/unitPrice as number strings
-// Frontend form uses number inputs, so we transform before sending to API
 // ---
 
 const purchaseOrderItemSchema = z.object({
@@ -38,7 +36,7 @@ export function transformPurchaseOrderToApi(data: CreatePurchaseOrderFormInput) 
     orderNumber: generateOrderNumber(),
     items: data.items.map(item => ({
       ...item,
-      quantity: item.quantity.toString(),
+      quantity: Number(item.quantity),
       unitPrice: item.unitPrice.toString(),
     })),
   };

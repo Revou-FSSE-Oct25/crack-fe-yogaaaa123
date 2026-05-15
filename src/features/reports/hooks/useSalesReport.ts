@@ -26,6 +26,28 @@ export function useSalesReport() {
 
   return useQuery({
     queryKey: ['sales-report', startDate, endDate, status],
-    queryFn: () => apiClient<{ data: SalesReportItem[]; summary: { totalSales: number; totalProfit: number } }>(`/reports/sales?${qs.toString()}`),
+    queryFn: async () => {
+      const res = await apiClient<{
+        orders: Array<{
+          orderNumber: string;
+          totalPrice: string;
+          totalProfit: string;
+          status: string;
+          createdAt: string;
+        }>;
+        summary: { totalRevenue: number; totalProfit: number };
+      }>(`/reports/sales?${qs.toString()}`);
+
+      return {
+        data: res.orders.map((o) => ({
+          date: o.createdAt,
+          orderNumber: o.orderNumber,
+          totalAmount: Number(o.totalPrice),
+          profit: Number(o.totalProfit),
+          status: o.status,
+        })),
+        summary: { totalSales: res.summary.totalRevenue, totalProfit: res.summary.totalProfit },
+      };
+    },
   });
 }

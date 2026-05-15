@@ -9,6 +9,7 @@ export interface ActivityLogEntry {
   entityId?: string;
   userId: string;
   userName: string;
+  user?: { id: string; username: string; role: string };
   details?: Record<string, unknown>;
   createdAt: string;
 }

@@ -65,12 +65,12 @@ export function ActivityLogTable() {
         <tbody className="divide-y divide-slate-100">
           {logs.map((log) => (
             <>
-              <tr className="transition-colors hover:bg-slate-50/50">
+              <tr key={log.id} className="transition-colors hover:bg-slate-50/50">
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
                   {new Date(log.createdAt).toLocaleString('id-ID')}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900">
-                  {log.userName}
+                  {log.user?.username || '-'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4">
                   <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
