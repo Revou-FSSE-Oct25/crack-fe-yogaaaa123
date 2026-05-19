@@ -7,18 +7,6 @@ const UNSAFE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 let refreshPromise: Promise<boolean> | null = null;
 let redirecting = false;
 
-// Detect JWT mode from cookie
-function getJwtMode(): 'platform' | 'tenant' | null {
-  if (typeof window === 'undefined') return null;
-  const cookies = document.cookie.split(';').map(c => c.trim());
-  const platformJwt = cookies.find(c => c.startsWith('platform_jwt='));
-  const tenantJwt = cookies.find(c => c.startsWith('access_token='));
-  
-  if (platformJwt) return 'platform';
-  if (tenantJwt) return 'tenant';
-  return null;
-}
-
 async function tryRefreshToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
 
@@ -67,12 +55,7 @@ export async function apiClient<T>(
     headers.set('Content-Type', 'application/json');
   }
 
-  // Send JWT from cookie as Bearer header for proxied requests
-  const cookies = document.cookie.split('; ').reduce((acc, c) => { const [k, v] = c.split('='); if(k) acc[k.trim()] = v; return acc; }, {} as Record<string, string>);
-  const authToken = cookies['auth_token'] || cookies['at'];
-  if (authToken && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${authToken}`);
-  }
+
 
   if (UNSAFE_METHODS.includes(method)) {
     const token = await fetchCsrfToken();
@@ -98,24 +81,13 @@ export async function apiClient<T>(
 
   if (!response.ok) {
     if (response.status === 401 && !isRetry && endpoint !== '/auth/login' && endpoint !== '/auth/refresh' && endpoint !== '/auth/google' && endpoint !== '/auth/create-store') {
-      const mode = getJwtMode();
-      
-      if (mode === 'platform') {
-        // Platform JWT expired → redirect to create-store
-        redirectToCreateStore();
-        throw new Error('Platform session expired');
-      } else if (mode === 'tenant') {
-        // Tenant JWT expired → try refresh
-        const refreshed = await tryRefreshToken();
-        if (refreshed) {
-          resetCsrfToken();
-          return apiClient<T>(endpoint, options, idempotent, true);
-        }
-        redirectToLogin();
-      } else {
-        // No JWT → redirect to login
-        redirectToLogin();
+      const refreshed = await tryRefreshToken(); // Try to refresh the HttpOnly token
+      if (refreshed) {
+        resetCsrfToken(); // Reset CSRF token as it might be new after refresh
+        return apiClient<T>(endpoint, options, idempotent, true); // Retry original request
       }
+      // If refresh failed or no HttpOnly token was sent, redirect to login
+      redirectToLogin();
     }
 
     const error: ApiError = {

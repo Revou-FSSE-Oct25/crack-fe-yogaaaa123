@@ -17,10 +17,7 @@ export function useLoginMutation() {
         body: JSON.stringify(credentials),
       });
       
-      if (response.accessToken) {
-        document.cookie = `at=${response.accessToken}; path=/; max-age=900; SameSite=Lax`;
-      }
-      
+
       return response;
     },
 

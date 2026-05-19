@@ -1,49 +1,27 @@
 'use client';
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Sidebar } from '@/components/layouts/Sidebar';
 import { DashboardHeader } from '@/components/layouts/DashboardHeader';
 import { AiChatWidget } from '@/features/ai/components/AiChatWidget';
 import type { UserRole } from '@/infrastructure/utils/constants';
-import { jwtVerify } from 'jose';
 
 interface Props {
-  role?: UserRole;
+  role: UserRole | null;
   children: ReactNode;
 }
 
-function decodeRoleFromCookie(): UserRole | null {
-  if (typeof document === 'undefined') return null;
-  const cookies = document.cookie.split('; ').reduce((acc, c) => {
-    const [k, v] = c.split('=');
-    if (k) acc[k.trim()] = v;
-    return acc;
-  }, {} as Record<string, string>);
-  const token = cookies['auth_token'] || cookies['at'];
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.role || null;
-  } catch {
-    return null;
-  }
-}
-
-export function DashboardShell({ role: serverRole, children }: Props) {
+export function DashboardShell({ role, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [role, setRole] = useState<UserRole | null>(serverRole || null);
 
-  useEffect(() => {
-    if (!role) {
-      const r = decodeRoleFromCookie();
-      if (r) {
-        setRole(r);
-      } else {
-        window.location.href = '/login';
-      }
-    }
-  }, [role]);
+  // Redirect if no role (not logged in) is passed from server
+  if (!role && typeof window !== 'undefined') {
+    window.location.href = '/login';
+    return null; // Don't render anything while redirecting
+  }
 
+  // If role is still null (e.g. during SSR when role is not yet determined),
+  // we can render a loading state or return null temporarily
   if (!role) {
     return null;
   }
