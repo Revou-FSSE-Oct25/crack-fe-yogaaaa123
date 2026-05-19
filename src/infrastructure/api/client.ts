@@ -67,6 +67,13 @@ export async function apiClient<T>(
     headers.set('Content-Type', 'application/json');
   }
 
+  // Send JWT from cookie as Bearer header for proxied requests
+  const cookies = document.cookie.split('; ').reduce((acc, c) => { const [k, v] = c.split('='); if(k) acc[k.trim()] = v; return acc; }, {} as Record<string, string>);
+  const authToken = cookies['auth_token'] || cookies['at'];
+  if (authToken && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${authToken}`);
+  }
+
   if (UNSAFE_METHODS.includes(method)) {
     const token = await fetchCsrfToken();
     headers.set('X-CSRF-Token', token);

@@ -10,9 +10,10 @@ export interface LoginCredentials {
   password: string;
 }
 
-/** Shape returned by POST /auth/login (BE sets cookies server-side) */
+/** Shape returned by POST /auth/login */
 export interface LoginResponse {
-  user: AuthUser; // access_token is in HttpOnly cookie, NOT in body
+  user: AuthUser;
+  accessToken?: string;
 }
 
 /** Shape returned by POST /auth/register */

@@ -2,8 +2,11 @@
 // Application-wide constants
 // ---
 
-/** Cookie key used to store the JWT auth token */
+/** Cookie key used to store the JWT auth token (HttpOnly from server) */
 export const AUTH_TOKEN_KEY = 'auth_token';
+
+/** Cookie key used client-side (non-HttpOnly, Vercel domain) */
+export const AUTH_COOKIE_KEY = 'at';
 
 /** TanStack Query cache keys — centralised to avoid typos */
 export const QUERY_KEYS = {

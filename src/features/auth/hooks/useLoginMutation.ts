@@ -11,11 +11,18 @@ export function useLoginMutation() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: (credentials: LoginCredentials) =>
-      apiClient<LoginResponse>('/auth/login', {
+    mutationFn: async (credentials: LoginCredentials) => {
+      const response = await apiClient<LoginResponse>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
-      }),
+      });
+      
+      if (response.accessToken) {
+        document.cookie = `at=${response.accessToken}; path=/; max-age=900; SameSite=Lax`;
+      }
+      
+      return response;
+    },
 
     onSuccess: (response) => {
       resetCsrfToken();
