@@ -68,7 +68,9 @@ function ProductsContent() {
         </Button>
       </div>
 
-      <ProductSearchBar />
+      <Suspense fallback={<div className="text-center text-gray-400">Loading search...</div>}>
+        <ProductSearchBar />
+      </Suspense>
 
       {isLoading ? (
         <p className="py-8 text-center text-gray-400">Loading products…</p>

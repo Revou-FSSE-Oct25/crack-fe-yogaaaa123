@@ -8,14 +8,21 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import type { ApiError } from '@/infrastructure/api/types';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export function RegisterForm() {
+  const searchParams = useSearchParams();
+  const plan = searchParams.get('plan') || 'free';
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      plan,
+    },
   });
 
   const registration = useRegisterMutation();
@@ -26,6 +33,7 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <input type="hidden" {...register('plan')} />
       <Input
         id="storeName"
         label="Store Name"

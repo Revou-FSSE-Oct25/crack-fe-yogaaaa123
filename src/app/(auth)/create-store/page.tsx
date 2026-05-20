@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { CreateStoreForm } from '@/features/auth/components/CreateStoreForm';
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function CreateStorePage() {
           </p>
         </div>
 
-        <CreateStoreForm />
+        <Suspense fallback={<div className="text-center text-gray-500">Loading...</div>}>
+          <CreateStoreForm />
+        </Suspense>
       </div>
     </div>
   );
